@@ -39,7 +39,7 @@
    :to-base (fn [x radix] (Integer/toString x radix))
    :bit-count (fn [x] (- 32 (Integer/numberOfLeadingZeros x)))})
 
-(def b-count {:bit-count (fn [x] (count (to-binary x)))})
+(def b-count {:bit-count (fn [x] (-> x to-binary count))})
 
 (extend Long
   GeneralBitOps
@@ -83,9 +83,7 @@
 
 (defn compose
   ([base x n]
-   (bit-or
-     (-> (bit-count x) (mask n) bit-not (bit-and base))
-     (bit-shift-left x n)))
+   (-> (bit-count x) (mask n) bit-not (bit-and base) (bit-or (bit-shift-left x n))))
   ([base x n rng]
    {:pre [(<= (bit-count x) rng)]}
    (compose base x n)))
