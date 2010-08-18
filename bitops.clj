@@ -5,15 +5,13 @@
 
 (ns binary)
 
-;; Protocols
-
 ;;
 ;; Integer (whole number) specific bit operations.
 ;;
 
 (defprotocol IntegerBitOps
-  (bit-rotate-left [x n])
-  (bit-rotate-right [x n]))
+  (bit-rotate-left [x n] "Bitwise rotate left.")
+  (bit-rotate-right [x n] "Bitwise rotate right."))
 
 (extend-protocol IntegerBitOps
   Integer
@@ -29,39 +27,41 @@
 ;;
 
 (defprotocol GeneralBitOps
-  (to-binary [x])
-  (to-base [x radix])
-  (bit-count [x]))
+  (to-binary [x] "Returns the binary string representation of arg.")
+  (to-base [x radix] "Returns the string representation of arg in the given radix.")
+  (bit-count [x] [x radix] "Returns the number of digits to represent arg in the given radix. If no radix is supplied, 2 is the default."))
 
 (extend Integer
   GeneralBitOps
   {:to-binary (fn [x] (Integer/toBinaryString x))
    :to-base (fn [x radix] (Integer/toString x radix))
-   :bit-count (fn [x] (- 32 (Integer/numberOfLeadingZeros x)))})
+   :bit-count (fn ([x] (- 32 (Integer/numberOfLeadingZeros x)))
+                  ([x radix] (-> x (to-base radix) count)))})
 
-(def b-count {:bit-count (fn [x] (-> x to-binary count))})
+(defn- b-count [] {:bit-count (fn ([x] (-> x to-binary count))
+                                  ([x radix] (-> x (to-base radix) count)))})
 
 (extend Long
   GeneralBitOps
-  (merge b-count
+  (merge (b-count)
          {:to-binary (fn [x] (Long/toBinaryString x))
           :to-base (fn [x radix] (Long/toString x radix))}))
 
 (extend BigInteger
   GeneralBitOps
-  (merge b-count
+  (merge (b-count
          {:to-binary (fn [x] (.toString x 2))
           :to-base (fn [x radix] (.toString x radix))}))
 
 (extend Float
   GeneralBitOps
-  (merge b-count
+  (merge (b-count
          {:to-binary (fn [x] (-> x Float/floatToIntBits Integer/toBinaryString))
           :to-base (fn [x radix] (-> x Float/floatToIntBits (Integer/toString radix)))}))
 
 (extend Double
   GeneralBitOps
-  (merge b-count
+  (merge (b-count
          {:to-binary (fn [x] (-> x Double/doubleToLongBits Long/toBinaryString))
           :to-base (fn [x radix] (-> x Double/doubleToLongBits (Long/toString radix)))}))
 
@@ -70,22 +70,30 @@
 ;;
 
 (defn mask
+  "Returns a number that represents a mask of the given length.
+   Optionally, a (left) shift amount may be supplied."
   ([n]
    (-> (bit-shift-left 1 n) dec))
   ([n shift]
    (-> (bit-shift-left 1 n) dec (bit-shift-left shift))))
 
 (defn isolate-range
+  "Returns the number represented by isolating arg at the given bit.
+   If a length to isolate by is not given, the rest of the bit string
+   will be used."
   ([x n]
    (-> (bit-count x) (- n) inc (mask n) (bit-and x) (bit-shift-right n)))
-  ([x n rng]
-   (-> (mask rng n) (bit-and x) (bit-shift-right n))))
+  ([x n len]
+   (-> (mask len n) (bit-and x) (bit-shift-right n))))
 
 (defn compose
+  "Compose x into the base number at the given bit. If a length is
+   given, an exception will be thrown if the bit-count of x is
+   greater than length."
   ([base x n]
    (-> (bit-count x) (mask n) bit-not (bit-and base) (bit-or (bit-shift-left x n))))
-  ([base x n rng]
-   {:pre [(<= (bit-count x) rng)]}
+  ([base x n len]
+   {:pre [(<= (bit-count x) len)]}
    (compose base x n)))
 
 ;;
@@ -93,13 +101,16 @@
 ;;
 
 (defn << 
+  "Bitwise arithmetic left shift."
   [x n]
   (bit-shift-left x n))
 
 (defn >>
+  "Bitwise arithmetic right shift."
   [x n]
   (bit-shift-right x n))
 
 (defn >>>
+  "Bitwise logical right shift."
   [x n]
   (isolate-range x n (- (bit-count x) n)))
