@@ -27,19 +27,20 @@
 ;;
 
 (defprotocol GeneralBitOps
-  (to-binary [x] "Returns the binary string representation of arg.")
-  (to-base [x radix] "Returns the string representation of arg in the given radix.")
-  (bit-count [x] [x radix] "Returns the number of digits to represent arg in the given radix. If no radix is supplied, 2 is the default."))
+  (to-binary [x] "Returns the 2's complement binary string representation of arg.")
+  (to-base [x radix] "Returns the string representation of arg in the given radix. Where it would apply, results are not sign extended.")
+  (bit-count [x] [x radix] "Returns the number of digits to represent arg in the given radix. If no radix is supplied, results are sign extended (where makes sense) and 2 is the default."))
 
 (extend Integer
   GeneralBitOps
   {:to-binary (fn [x] (Integer/toBinaryString x))
    :to-base (fn [x radix] (Integer/toString x radix))
    :bit-count (fn ([x] (- 32 (Integer/numberOfLeadingZeros x)))
-                  ([x radix] (-> x (to-base radix) count)))})
+                  ([x radix] (-> (Math/abs x) (to-base radix) count)))})
 
+;; Returns a common implementation of bit-count.
 (defn- b-count [] {:bit-count (fn ([x] (-> x to-binary count))
-                                  ([x radix] (-> x (to-base radix) count)))})
+                                  ([x radix] (-> (Math/abs x) (to-base radix) count)))})
 
 (extend Long
   GeneralBitOps
@@ -49,19 +50,19 @@
 
 (extend BigInteger
   GeneralBitOps
-  (merge (b-count
+  (merge (b-count)
          {:to-binary (fn [x] (.toString x 2))
           :to-base (fn [x radix] (.toString x radix))}))
 
 (extend Float
   GeneralBitOps
-  (merge (b-count
+  (merge (b-count)
          {:to-binary (fn [x] (-> x Float/floatToIntBits Integer/toBinaryString))
           :to-base (fn [x radix] (-> x Float/floatToIntBits (Integer/toString radix)))}))
 
 (extend Double
   GeneralBitOps
-  (merge (b-count
+  (merge (b-count)
          {:to-binary (fn [x] (-> x Double/doubleToLongBits Long/toBinaryString))
           :to-base (fn [x radix] (-> x Double/doubleToLongBits (Long/toString radix)))}))
 
