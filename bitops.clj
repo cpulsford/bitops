@@ -3,7 +3,7 @@
 ;; Cameron Pulsford
 ;;
 
-(ns binary)
+(ns general-bitops)
 
 ;; For consistency with new >>> operator
 (defn <<
@@ -101,8 +101,10 @@
   "Returns the number represented by isolating arg at the given bit
    for the given length. If a length to isolate by is not given, the
    rest of the bit string will be used."
-  ([x n] (-> (bit-count x) (- n) mask (bit-and (>>> x n))))
-  ([x n len] (-> x (>>> n) (bit-and (mask len)))))
+  ([x n]
+   (-> (bit-count x) (- n) mask (bit-and (>>> x n))))
+  ([x n len]
+   (-> x (>>> n) (bit-and (mask len)))))
 
 (defn compose
   "Compose x into the base number at the given bit. If a length is
