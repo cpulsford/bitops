@@ -27,9 +27,9 @@
 ;;
 
 (defprotocol GeneralBitOps
-  (to-binary [x] "Returns the 2's complement binary string representation of arg.")
+  (to-binary [x] "Returns the 2's complement or IEEE 754 binary string representation of arg.")
   (to-base [x radix] "Returns the string representation of arg in the given radix. Where it would apply, results are not sign extended.")
-  (bit-count [x] [x radix] "Returns the number of digits to represent arg in the given radix. If no radix is supplied, results are sign extended (where makes sense) and 2 is the default."))
+  (bit-count [x] [x radix] "If a radix is supplied, returns the number of digits to represent arg in the given radix. Where it would apply, results are not sign extended. Otherwise, if no radix is supplied, will return the number of bits in arg's 2's complement or IEEE 754 binary string representation."))
 
 (extend Integer
   GeneralBitOps
@@ -79,9 +79,9 @@
    (-> (bit-shift-left 1 n) dec (bit-shift-left shift))))
 
 (defn isolate-range
-  "Returns the number represented by isolating arg at the given bit.
-   If a length to isolate by is not given, the rest of the bit string
-   will be used."
+  "Returns the number represented by isolating arg at the given bit
+   for the given length. If a length to isolate by is not given, the
+   rest of the bit string will be used."
   ([x n]
    (-> (bit-count x) (- n) inc (mask n) (bit-and x) (bit-shift-right n)))
   ([x n len]
@@ -90,7 +90,8 @@
 (defn compose
   "Compose x into the base number at the given bit. If a length is
    given, an exception will be thrown if the bit-count of x is
-   greater than length."
+   greater than length. The base number is positioned first in the arg
+   list to allow for composition chains."
   ([base x n]
    (-> (bit-count x) (mask n) bit-not (bit-and base) (bit-or (bit-shift-left x n))))
   ([base x n len]
@@ -99,17 +100,21 @@
 
 ;;
 ;; The following functions have the same semantics as their Java counterparts.
+;; 
+;; The defintions of << and >> have been ripped from core for speed.
 ;;
 
-(defn << 
-  "Bitwise arithmetic left shift."
+(defn <<
+  "Arithmetic bitwise shift left"
+  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftLeft ~x ~n)))}
   [x n]
-  (bit-shift-left x n))
+  (. clojure.lang.Numbers shiftLeft x n))
 
 (defn >>
-  "Bitwise arithmetic right shift."
+  "Arithmetic bitwise shift right"
+  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftRight ~x ~n)))}
   [x n]
-  (bit-shift-right x n))
+  (. clojure.lang.Numbers shiftRight x n))
 
 (defn >>>
   "Bitwise logical right shift."
