@@ -1,0 +1,111 @@
+From 6b297e51750a69b5ddd107f8e9527f9128b65bfa Mon Sep 17 00:00:00 2001
+From: Cameron Pulsford <cpulsfor@gmail.com>
+Date: Mon, 23 Aug 2010 19:08:59 -0400
+Subject: [PATCH] Modified all bit functions.
+
+---
+ src/clj/clojure/core.clj |   49 +++++++++++++++++++++++++--------------------
+ 1 files changed, 27 insertions(+), 22 deletions(-)
+
+diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
+index fdfd37a..c3708e2 100644
+--- a/src/clj/clojure/core.clj
++++ b/src/clj/clojure/core.clj
+@@ -1011,67 +1011,72 @@
+ 
+ (defn bit-not
+   "Bitwise complement"
+-  {:inline (fn [x] `(. clojure.lang.Numbers (not ~x)))
++  {:inline (fn [x] `(clojure.lang.Numbers/not ~x))
+    :added "1.0"}
+-  [x] (. clojure.lang.Numbers not x))
++  [x] (clojure.lang.Numbers/not x))
+ 
+ 
+ (defn bit-and
+   "Bitwise and"
+-   {:inline (fn [x y] `(. clojure.lang.Numbers (and ~x ~y)))
++   {:inline (fn [x y] `(clojure.lang.Numbers/and ~x ~y))
+     :added "1.0"}
+-  [x y] (. clojure.lang.Numbers and x y))
++  [x y] (clojure.lang.Numbers/and x y))
+ 
+ (defn bit-or
+   "Bitwise or"
+-  {:inline (fn [x y] `(. clojure.lang.Numbers (or ~x ~y)))
++  {:inline (fn [x y] `(clojure.lang.Numbers/or ~x ~y))
+    :added "1.0"}
+-  [x y] (. clojure.lang.Numbers or x y))
++  [x y] (clojure.lang.Numbers/or x y))
+ 
+ (defn bit-xor
+   "Bitwise exclusive or"
+-  {:inline (fn [x y] `(. clojure.lang.Numbers (xor ~x ~y)))
++  {:inline (fn [x y] `(clojure.lang.Numbers/xor ~x ~y))
+    :added "1.0"}
+-  [x y] (. clojure.lang.Numbers xor x y))
++  [x y] (clojure.lang.Numbers/xor x y))
+ 
+ (defn bit-and-not
+   "Bitwise and with complement"
+-  {:added "1.0"}
+-  [x y] (. clojure.lang.Numbers andNot x y))
++  {:inline (fn [x y] `(clojure.lang.Numbers/andNot ~x ~y))
++   :added "1.0"}
++  [x y] (clojure.lang.Numbers/andNot ~x ~y))
+ 
+ 
+ (defn bit-clear
+   "Clear bit at index n"
+-  {:added "1.0"}
+-  [x n] (. clojure.lang.Numbers clearBit x n))
++  {:inline (fn [x n] `(clojure.lang.Numbers/clearBit ~x ~n))
++   :added "1.0"}
++  [x n] (clojure.lang.Numbers/clearBit x n))
+ 
+ (defn bit-set
+   "Set bit at index n"
+-  {:added "1.0"}
+-  [x n] (. clojure.lang.Numbers setBit x n))
++  {:inline (fn [x n] `(clojure.lang.Numbers/setBit ~x ~n))
++   :added "1.0"}
++  [x n] (clojure.lang.Numbers/setBit x n))
+ 
+ (defn bit-flip
+   "Flip bit at index n"
+-  {:added "1.0"}
+-  [x n] (. clojure.lang.Numbers flipBit x n))
++  {:inline (fn [x n] `(clojure.lang.Numbers/flipBit ~x ~n))
++   :added "1.0"}
++  [x n] (clojure.lang.Numbers/flipBit ~x ~n))
+ 
+ (defn bit-test
+   "Test bit at index n"
+-  {:added "1.0"}
+-  [x n] (. clojure.lang.Numbers testBit x n))
++  {:inline (fn [x n] `(clojure.lang.Numbers/testBit ~x ~n))
++   :added "1.0"}
++  [x n] (clojure.lang.Numbers/testBit x n))
+ 
+ 
+ (defn bit-shift-left
+   "Bitwise shift left"
+-  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftLeft ~x ~n)))
++  {:inline (fn [x n] `(clojure.lang.Numbers/shiftLeft ~x ~n))
+    :added "1.0"}
+-  [x n] (. clojure.lang.Numbers shiftLeft x n))
++  [x n] (clojure.lang.Numbers/shiftLeft x n))
+ 
+ (defn bit-shift-right
+   "Bitwise shift right"
+-  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftRight ~x ~n)))
++  {:inline (fn [x n] `(clojure.lang.Numbers/shiftRight ~x ~n))
+    :added "1.0"}
+-  [x n] (. clojure.lang.Numbers shiftRight x n))
++  [x n] (clojure.lang.Numbers/shiftRight x n))
+ 
+ (defn even?
+   "Returns true if n is even, throws an exception if n is not an integer"
+-- 
+1.7.2.2
+

@@ -1,7 +1,7 @@
-From 22b76f57f288ad6a3ce819f49bdd5e25c220d1e7 Mon Sep 17 00:00:00 2001
+From 72b2e5db8a9b296d5f13adad6488e976186af18f Mon Sep 17 00:00:00 2001
 From: Cameron Pulsford <cpulsfor@gmail.com>
-Date: Fri, 20 Aug 2010 15:07:13 -0400
-Subject: [PATCH] Added unsigned right shift.
+Date: Mon, 23 Aug 2010 18:54:55 -0400
+Subject: [PATCH] Added unsigned-right-shift.
 
 ---
  src/clj/clojure/core.clj          |    6 ++++++
@@ -9,7 +9,7 @@ Subject: [PATCH] Added unsigned right shift.
  2 files changed, 32 insertions(+), 0 deletions(-)
 
 diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
-index fdfd37a..414cfe1 100644
+index fdfd37a..2e23bd9 100644
 --- a/src/clj/clojure/core.clj
 +++ b/src/clj/clojure/core.clj
 @@ -1073,6 +1073,12 @@
@@ -17,10 +17,10 @@ index fdfd37a..414cfe1 100644
    [x n] (. clojure.lang.Numbers shiftRight x n))
  
 +(defn >>>
-+  "Bitwise logical shift right"
-+  {:inline (fn [x n] `(. clojure.lang.Numbers (logicalShiftRight ~x ~n)))
-+   :added "1.0"}
-+  [x n] (. clojure.lang.Numbers logicalShiftRight x n))
++  "Bitwise unsigned shift right"
++  {:inline (fn [x n] `(clojure.lang.Numbers/logicalShiftRight ~x ~n))
++   :added "1.3"}
++  [x n] (clojure.lang.Numbers/logicalShiftRight x n))
 +
  (defn even?
    "Returns true if n is even, throws an exception if n is not an integer"
@@ -91,5 +91,5 @@ index 2aaabee..1917ff5 100644
  
  static final IntegerOps INTEGER_OPS = new IntegerOps();
 -- 
-1.7.2.1
+1.7.2.2
 
