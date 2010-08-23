@@ -1,0 +1,95 @@
+From 22b76f57f288ad6a3ce819f49bdd5e25c220d1e7 Mon Sep 17 00:00:00 2001
+From: Cameron Pulsford <cpulsfor@gmail.com>
+Date: Fri, 20 Aug 2010 15:07:13 -0400
+Subject: [PATCH] Added unsigned right shift.
+
+---
+ src/clj/clojure/core.clj          |    6 ++++++
+ src/jvm/clojure/lang/Numbers.java |   26 ++++++++++++++++++++++++++
+ 2 files changed, 32 insertions(+), 0 deletions(-)
+
+diff --git a/src/clj/clojure/core.clj b/src/clj/clojure/core.clj
+index fdfd37a..414cfe1 100644
+--- a/src/clj/clojure/core.clj
++++ b/src/clj/clojure/core.clj
+@@ -1073,6 +1073,12 @@
+    :added "1.0"}
+   [x n] (. clojure.lang.Numbers shiftRight x n))
+ 
++(defn >>>
++  "Bitwise logical shift right"
++  {:inline (fn [x n] `(. clojure.lang.Numbers (logicalShiftRight ~x ~n)))
++   :added "1.0"}
++  [x n] (. clojure.lang.Numbers logicalShiftRight x n))
++
+ (defn even?
+   "Returns true if n is even, throws an exception if n is not an integer"
+   {:added "1.0"}
+diff --git a/src/jvm/clojure/lang/Numbers.java b/src/jvm/clojure/lang/Numbers.java
+index 2aaabee..1917ff5 100644
+--- a/src/jvm/clojure/lang/Numbers.java
++++ b/src/jvm/clojure/lang/Numbers.java
+@@ -92,6 +92,8 @@ static interface BitOps{
+ 	public Number shiftLeft(Number x, int n);
+ 
+ 	public Number shiftRight(Number x, int n);
++
++	public Number logicalShiftRight(Number x, int n);
+ }
+ 
+ 
+@@ -361,6 +363,14 @@ static public int shiftRight(int x, int n){
+ 	return x >> n;
+ }
+ 
++static public Number logicalShiftRight(Object x, Object n){
++	return bitOps(x).logicalShiftRight((Number)x, ((Number)n).intValue());
++}
++
++static public int logicalShiftRight(int x, int n){
++	return x >>> n;
++}
++
+ final static class IntegerOps implements Ops{
+ 	public Ops combine(Ops y){
+ 		return y.opsWith(this);
+@@ -1206,6 +1216,12 @@ final static class IntegerBitOps implements BitOps{
+ 			return shiftLeft(x, -n);
+ 		return x.intValue() >> n;
+ 	}
++
++	public Number logicalShiftRight(Number x, int n){
++		if(n < 0)
++			return shiftLeft(x, -n);
++		return x.intValue() >>> n;
++	}
+ }
+ 
+ final static class LongBitOps implements BitOps{
+@@ -1284,6 +1300,12 @@ final static class LongBitOps implements BitOps{
+ 			return shiftLeft(x, -n);
+ 		return x.longValue() >> n;
+ 	}
++
++	public Number logicalShiftRight(Number x, int n){
++		if(n < 0)
++			return shiftLeft(x, -n);
++		return x.longValue() >>> n;
++	}
+ }
+ 
+ final static class BigIntegerBitOps implements BitOps{
+@@ -1346,6 +1368,10 @@ final static class BigIntegerBitOps implements BitOps{
+ 	public Number shiftRight(Number x, int n){
+ 		return toBigInteger(x).shiftRight(n);
+ 	}
++
++	public Number logicalShiftRight(Number x, int n){
++		return toBigInteger(x).shiftRight(n);
++	}
+ }
+ 
+ static final IntegerOps INTEGER_OPS = new IntegerOps();
+-- 
+1.7.2.1
+
