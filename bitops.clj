@@ -5,18 +5,18 @@
 
 (ns general-bitops)
 
-;; For consistency with new >>> operator
+;; For consistency with >>> operator
 (defn <<
   "Arithmetic bitwise shift left"
-  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftLeft ~x ~n)))}
+  {:inline (fn [x n] `(clojure.lang.Numbers/shiftLeft ~x ~n))}
   [x n]
-  (. clojure.lang.Numbers shiftLeft x n))
+  (clojure.lang.Numbers/shiftLeft x n))
 
 (defn >>
   "Arithmetic bitwise shift right"
-  {:inline (fn [x n] `(. clojure.lang.Numbers (shiftRight ~x ~n)))}
+  {:inline (fn [x n] `(clojure.lang.Numbers/shiftRight ~x ~n))}
   [x n]
-  (. clojure.lang.Numbers shiftRight x n))
+  (clojure.lang.Numbers/shiftRight x n))
 
 
 
@@ -102,9 +102,9 @@
   for the given length. If a length to isolate by is not given, the
   rest of the bit string will be used."
   ([x n]
-   (-> (bit-count x) (- n) mask (bit-and (>>> x n))))
+   (bit-and (>>> x n) -1))
   ([x n len]
-   (-> x (>>> n) (bit-and (mask len)))))
+   (bit-and (>>> x n) (mask len))))
 
 (defn compose
   "Compose x into the base number at the given bit. If a length is
@@ -112,7 +112,7 @@
   greater than length. The base number is positioned first in the arg
   list to allow for composition chains."
   ([base x n]
-   (-> (bit-count x) (mask n) bit-not (bit-and base) (bit-or (<< x n))))
+   (-> x bit-count (mask n) (->> (bit-and-not base)) (bit-or (<< x n))))
   ([base x n len]
    {:pre [(<= (bit-count x) len)]}
-   (compose base x n)))
+   (->> (mask len n) (bit-and-not base) (bit-or (<< x n)))))
